@@ -14,7 +14,7 @@ const Main = PresentationalComponent((props) => {
   const { auth } = props.state
   return  auth.isFetching ?
     <div>Loading...</div> :
-    props.children
+    React.Children.only(props.children)
 })
 
 export default {
