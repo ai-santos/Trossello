@@ -4,6 +4,14 @@ Open Source Trello Clone
 
 [![CircleCI](https://circleci.com/gh/GuildCrafts/Trossello/tree/master.png?circle-token=859633aeb7d26e62dd772cda75da1ca27a6237db)](https://circleci.com/gh/GuildCrafts/Trossello/tree/master)
 
+### PARALLEL-WATERBUCK Specs
+
+- [ ] Make List names in-line editable.
+- [ ] Make search results say "No Results" when no matches are found.
+- [ ] Make Lists drag-and-dropable.
+- [ ] Study REACT basics and understand how it's intergrated into t
+
+
 ## Contributing
 
 1. Fork this repository
@@ -12,12 +20,7 @@ Open Source Trello Clone
 4. Finish the ticket
 5. Submit a pull request
 
-### PARALLEL-WATERBUCK Specs
-
-- [ ] Make List names in-line editable.
-- [ ] Make search results say "No Results" when no matches are found.
-- [ ] Make Lists drag-and-dropable.
-- [ ] Study REACT basics and understand how it's intergrated into the project.
+he project.
 
 #### Run the Server!
 
