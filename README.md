@@ -12,71 +12,13 @@ Open Source Trello Clone
 4. Finish the ticket
 5. Submit a pull request
 
-### Development Setup
+### PARALLEL-WATERBUCK Specs
 
-You'll need to
-[register this app](https://github.com/settings/applications/new)
-as an `Oauth application` on Github.
+- [ ] Make List names in-line editable.
+- [ ] Make search results say "No Results" when no matches are found.
+- [ ] Make Lists drag-and-dropable.
+- [ ] Study REACT basics and understand how it's intergrated into the project.
 
-```
-Application name
-Trossello (development)
-
-Homepage URL
-http://localhost:3000/
-
-Application description
-Open Source Trello Clone made by LearnersGuild (development)
-
-Authorization callback URL
-http://localhost:3000/oauth_callback
-```
-
-Copy the `client id` and `client secret` and use them below:
-
-Create a `.env` file in the root of the cloned repo that looks like this:
-```
-GITHUB_CLIENT_ID=GET_THIS_VALUE_FROM_GITHUB
-GITHUB_CLIENT_SECRET=GET_THIS_VALUE_FROM_GITHUB
-SESSION_KEY=MAKEUP_A_REALLY_LONG_STRING_HERE
-```
-
-#### Fork the Project and Add Remote Upstream
-
-Go to Github and fork the project to your repo, then clone the fork. Then run the following:
-
-```
-$ git remote add upstream https://github.com/GuildCrafts/Trossello.git
-```
-
-#### Install Postgres
-
-```sh
-brew install postgress
-brew tap homebrew/services
-brew services start postgresql
-```
-
-#### Ensure `./node_modules/.bin` is in your path
-
-Test to see if you have this setup
-```sh
-echo $PATH | grep './node_modules/.bin'
-```
-
-If the grep command above yields zero search results, do this:
-```sh
-# Add this line to your ~/.zshrc (zsh) or ~/.bash_profile (bash)
-export PATH="./node_modules/.bin:$PATH"
-```
-
-#### Create and Migrate the Database
-
-```sh
-createdb trossello-test
-createdb trossello-development
-knex migrate:latest
-```
 #### Run the Server!
 
 At this point, you should be able to run 'npm start' without errors.
