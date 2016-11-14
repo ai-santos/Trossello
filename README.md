@@ -9,7 +9,7 @@ Open Source Trello Clone
 - [x] Make List names in-line editable.
 - [x] Make search results say "No Results" when no matches are found.
 - [ ] Make Lists drag-and-dropable.
-- [x] Study REACT basics and understand how it's intergrated into t
+- [x] Study REACT basics and understand how it's intergrated into Trossello
 
 
 ## Contributing
