@@ -6,10 +6,10 @@ Open Source Trello Clone
 
 ### PARALLEL-WATERBUCK Specs
 
-- [ ] Make List names in-line editable.
-- [ ] Make search results say "No Results" when no matches are found.
+- [x] Make List names in-line editable.
+- [x] Make search results say "No Results" when no matches are found.
 - [ ] Make Lists drag-and-dropable.
-- [ ] Study REACT basics and understand how it's intergrated into t
+- [x] Study REACT basics and understand how it's intergrated into t
 
 
 ## Contributing
