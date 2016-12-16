@@ -17,12 +17,64 @@ const getBoardsByUserId = (userId) =>
   knex.table('boards')
     .select('boards.*')
     .join('user_boards', 'boards.id', '=', 'user_boards.board_id')
-    .whereIn('user_boards.user_id', userId)
+    .where('user_boards.user_id', userId)
     .where('archived', false)
 
+const getBoardMoveTargetsForUserId = (userId) =>
+  getBoardsByUserId(userId).then(boards =>
+    knex.table('lists')
+      .select('lists.*')
+      .count('cards.id AS card_count')
+      .join('cards', 'cards.list_id', '=', 'lists.id')
+      .whereIn('lists.board_id', boards.map(board => board.id))
+      .orderBy('lists.board_id', 'asc')
+      .orderBy('lists.order', 'asc')
+      .groupBy('lists.id')
+      .then(lists => {
+        lists.forEach(lists => lists.card_count = Number(lists.card_count))
+        boards.forEach(board => {
+          board.lists = lists.filter(list => list.board_id === board.id)
+        })
+        return boards
+      })
+  )
+
+const getUsersForBoard = (board) => {
+  return knex.table('users')
+    .select('users.*')
+    .join('user_boards', 'users.id', '=', 'user_boards.user_id' )
+    .whereIn('user_boards.board_id', board.id)
+    .then( users => {
+      board.users = users
+      return board
+    })
+}
+
+const getLabelsForBoard = (board) => {
+  return knex.table('labels')
+    .select('*')
+    .where({board_id: board.id})
+    .orderBy('id', 'asc')
+    .then( labels => {
+      board.labels = labels
+      return board
+    })
+}
 
 const getBoardById = (id) =>
-  getRecordById('boards', id).then(getListsAndCardsForBoard)
+  getRecordById('boards', id)
+    .then( board => {
+      if (board){
+        return Promise.all([
+          getListsAndCardsForBoard(board),
+          getUsersForBoard(board),
+          getLabelsForBoard(board),
+          getActivityForBoard(board),
+        ]).then( () => board)
+      }else{
+        return Promise.resolve(board)
+      }
+    })
 
 const getSearchResult = (userId, searchTerm) => {
   if (!searchTerm) return Promise.resolve([])
@@ -32,23 +84,38 @@ const getSearchResult = (userId, searchTerm) => {
     .whereIn('user_boards.user_id', userId)
     .where(knex.raw('archived = false AND lower(content) LIKE ?', `%${searchTerm.toLowerCase()}%`))
     .orderBy('id', 'asc')
+    .then(loadLabelIdsForCards)
 }
 
+const loadLabelIdsForCards = cards =>
+  knex.table('card_labels')
+    .select('*')
+    .whereIn('card_labels.card_id', cards.map(card => card.id))
+    .then(cardLabels => {
+      cards.forEach(card => {
+        card.label_ids = cardLabels
+          .filter(cardLabel => cardLabel.card_id === card.id)
+          .map(cardLabel => cardLabel.label_id)
+      })
+      return cards
+    })
+
 const getListsAndCardsForBoard = (board) => {
-  if (!board) return Promise.resolve(board)
   return knex.table('lists')
     .select('*')
     .where({
       board_id: board.id
     })
-    .orderBy('id', 'asc')
+    .orderBy('order', 'asc')
     .then(lists => {
       board.lists = lists
       const listIds = lists.map(list => list.id)
       return knex.table('cards')
         .select('*')
         .whereIn('list_id', listIds)
-        .orderBy('id', 'asc')
+        .orderBy('list_id', 'asc')
+        .orderBy('order', 'asc')
+        .then(loadLabelIdsForCards)
         .then(cards => {
           board.cards = cards
           return board
@@ -59,16 +126,33 @@ const getListsAndCardsForBoard = (board) => {
 const getListById = (id) =>
   getRecordById('lists', id)
 
+
 const getCardById = (id) =>
   getRecordById('cards', id)
 
-// INVITES
+const getLabelById = (id) =>
+  getRecordById('labels', id)
 
-const verifyToken = (token) => {
+const getInviteByToken = (token) => {
   return knex.table('invites')
     .select('*')
     .where('token', token)
-    .first()
+    .first('*')
+}
+
+const getActivityForBoard = (board) => {
+  return getActivityByBoardId(board.id)
+    .then(activity => {
+      board.activity = activity
+      return board
+    })
+}
+
+const getActivityByBoardId = (boardId) => {
+  return knex.table('activity')
+    .select('*')
+    .where('board_id', boardId)
+    .orderBy('created_at', 'desc')
 }
 
 export default {
@@ -77,7 +161,11 @@ export default {
   getCardById,
   getSearchResult,
   getBoardsByUserId,
+  getLabelsForBoard,
   getBoardById,
   getListById,
-  verifyToken,
+  getInviteByToken,
+  getBoardMoveTargetsForUserId,
+  getLabelById,
+  getActivityByBoardId,
 }

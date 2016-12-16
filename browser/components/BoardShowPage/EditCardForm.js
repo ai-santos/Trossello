@@ -8,6 +8,8 @@ import ArchiveButton from './ArchiveButton'
 import $ from 'jquery'
 import boardStore from '../../stores/boardStore'
 import autosize from 'autosize'
+import sessionStorage from '../../sessionStorage'
+const KEY = "EditCardFormContent"
 
 export default class EditCardForm extends Component {
 
@@ -32,7 +34,9 @@ export default class EditCardForm extends Component {
   }
 
   initialContentValue(props){
-    return props.defaultValue || (props.card && props.card.content) || ''
+    return this.props.card ?
+      this.props.card.content || '' :
+      sessionStorage[KEY] || ''
   }
 
   componentDidMount() {
@@ -45,19 +49,26 @@ export default class EditCardForm extends Component {
       event.preventDefault()
       this.save()
     }
-    if (event.keyCode === 27) {
+    if (event.key === 'Escape') {
       event.preventDefault()
-      this.cancel()
+      this.cancel(event)
     }
     autosize(this.refs.content)
   }
 
   onContentChange(event){
-    this.setState({content: event.target.value})
+    const cardContent = event.target.value
+    if (!this.props.card) {
+      sessionStorage[KEY] = cardContent
+    }
+    this.setState({content: cardContent})
   }
 
   save(event){
     if (event) event.preventDefault()
+    if (!this.props.card) {
+      delete sessionStorage[KEY]
+    }
     this.props.onSave({
       content: this.state.content.replace(/[\n\s]+$/, ''),
     })
@@ -66,10 +77,12 @@ export default class EditCardForm extends Component {
     })
   }
 
-  cancel(){
-    this.props.onCancel()
+  cancel(event){
+    if (!this.props.card) {
+      delete sessionStorage[KEY]
+    }
+    this.props.onCancel(event)
   }
-
 
   render() {
     const closeX = this.props.hideCloseX ? null :

@@ -1,21 +1,156 @@
 @import "../style.sass"
 
+=ghosted
+  background-color: rgba(0,0,0,0.15)
+  border-radius: 3px
+  > *
+    opacity: 0
+
 .BoardShowPage
   $button-height: 30px
   $button-margin: 4px
   $list-width: 270px
+  $MenuSideBar-width: 300px
+  overflow: hidden
 
-  font-family: "Helvetica Neue"
-  &-Header
-    justify-content: space-between
+  .Layout-content
     display: flex
     flex-direction: row
-    z-index: 10
-    > h1
-      font-family: "Helvetica Neue"
-      font-weight: 500
-      margin: 0
-      color: #fff
+
+  &-container
+    display: flex
+    flex-direction: column
+    flex-grow: 1
+    flex-shrink: 1
+    overflow: hidden
+    margin-right: -$MenuSideBar-width
+    transition: margin-right 200ms
+
+  &-MenuSideBar
+    flex-grow: 0
+    flex-shrink: 0
+    flex-basis: $MenuSideBar-width
+    position: relative
+    left: $MenuSideBar-width
+    width: $MenuSideBar-width
+    transition: left 200ms
+
+  &-sideBarOpen
+    .BoardShowPage-container
+      margin-right: 0
+    .BoardShowPage-MenuSideBar
+      left: 0
+
+  &-Header
+    flex-shrink: 0
+    flex-grow: 0
+    padding: 10px 10px 0 10px
+
+  &-RenameBoardButton
+    > .Button
+      padding: 0 6px
+      &:hover
+        background-color: rgba(0,0,0,0.12)
+      > h1
+        font-family: "Helvetica Neue"
+        font-weight: 500
+        margin: 0
+        color: #fff
+        font-size: 18px
+
+  &-lists
+    display: flex
+    flex-shrink: 1
+    flex-grow: 1
+    align-items: stretch
+    overflow-x: auto
+    overflow-y: hidden
+    padding: 10px 10px 0 10px
+    margin-bottom: 10px
+
+    -webkit-overflow-scrolling: initial
+
+    &::-webkit-scrollbar
+      -webkit-appearance: none
+      height: 13px
+      width: 13px
+
+    &::-webkit-scrollbar-button:end:increment,
+    &::-webkit-scrollbar-button:start:decrement
+      background: 0 0
+      display: none
+
+    &::-webkit-scrollbar-track-piece
+      background-color: rgba(0, 0, 0, .13)
+
+    &::-webkit-scrollbar-track-piece:vertical:start
+      border-radius: 5px 5px 0 0
+
+    &::-webkit-scrollbar-track-piece:vertical:end
+      border-radius: 0 0 5px 5px
+
+    &::-webkit-scrollbar-track-piece:horizontal
+      margin-bottom: 10px
+
+    &::-webkit-scrollbar-track-piece:horizontal:start
+      margin-left: 10px
+      border-radius: 5px 0 0 5px
+
+    &::-webkit-scrollbar-track-piece:horizontal:end
+      margin-right: 10px
+      border-radius: 0 5px 5px 0
+
+    &::-webkit-scrollbar-thumb:horizontal,
+    &::-webkit-scrollbar-thumb:vertical
+      background-color: rgba(255, 255, 255, .5)
+      border-radius: 5px
+      display: block
+      // height: 50px
+
+  &-Header
+    display: flex
+    flex-direction: row
+    justify-content: flex-start
+    align-items: center
+    &-SideMenu
+      margin-left: auto
+    .BoardStar
+      > .Icon
+        opacity: 1
+        transform: none
+      padding: 9px
+      border-radius: 3px
+      &-active
+        background-color: rgba(0,0,0,.12)
+        &:hover
+          background-color: rgba(0,0,0,.3)
+        & > .Icon
+          &, &:hover
+            color: $gold
+      &-inactive
+        &:hover
+          background-color: rgba(0,0,0,.12)
+        & > .Icon
+          &, &:hover
+            color: $white
+
+  &-menuButton
+    color: #fff
+    text-decoration: underline
+    font-size: 0.8em
+    display: inline-block
+    border: none
+    border-radius: 3px
+    padding: 8px 1pc
+    min-height: 30px
+    cursor: pointer
+    text-align: center
+    -webkit-appearance: none
+    &:hover
+      background-color: rgba(0, 0, 0, 0.2)
+    &-icon
+      padding-right: 4px
+
 
   &-DeleteBoardButton
     color: #000
@@ -29,73 +164,81 @@
       &:active
         background: linear-gradient(to bottom,#519839 0,#49852E 100%)
 
-  &-lists
-    display: flex
-    align-items: flex-start
-    position: absolute
-    top: 100px
-    left: 0
-    bottom: 0
-    right: 0
-    overflow-x: auto
-    overflow-y: hidden
-    white-space: nowrap
-    padding: 0 10px
 
   &-List
+    position: relative
     flex-grow: 0
     flex-shrink: 0
-    display: inline-flex
-    flex-direction: column
-    border-radius: 5px
-    margin-right: 10px
     width: $list-width
-    max-height: calc(100% - 10px)
-    background-color: #e2e4e6
-    font-family: "Helvetica Neue"
-
+    margin-right: 10px
+    margin-bottom: 10px
+    &-box
+      max-height: 100%
+      width: 100%
+      display: inline-flex
+      flex-direction: column
+      border-radius: 5px
+      background-color: #e2e4e6
+      font-family: "Helvetica Neue"
+      &-ghosted
+        +ghosted
 
   &-ListHeader
     flex-grow: 0
     flex-shrink: 0
-    padding: 8px 30px 8px 11px
+    padding: 5px 25px 5px 11px
     font-size: 14px
     font-weight: 500
     position: relative
 
-
-    &-ListOptions
-      position: absolute
-      right: 4px
-      top: 2px
-      > .Button
+    input
+      border: none
+      border-radius: 3px
+      background: none
+      padding: 3px 5px
+      &:focus
+        background-color: white
         outline: none
-        text-decoration: none
-        color: #999
-        position: absolute
-        right: 0px
-        top: 2px
-        min-height: 2px
-        padding: 4px 8px 4px 8px
-        &:hover
-          background-color: #CDD2D4
-          color: #444
-        &-text
-          margin-left: 5px
+
+  &-ListOptions
+    position: absolute
+    right: 4px
+    top: -2px
+    > .Button
+      outline: none
+      text-decoration: none
+      color: #999
+      position: absolute
+      right: 0px
+      top: 2px
+      min-height: 2px
+      padding: 4px 8px 4px 8px
+      &:hover
+        background-color: #CDD2D4
+        color: #444
+      &-text
+        margin-left: 5px
 
   &-NewListForm
     flex-grow: 0
     flex-shrink: 0
-    display: inline-flex
     width: $list-width
     padding-right: 10px
+
   &-EditButton
     text-decoration: none
-    opacity: 0.5
+    opacity: 0.7
     color: inherit
-    margin: 0 2px
+    margin: 0 -2px 0 0
+    border-radius: 3px
+    padding: 3px 5px
+    visibility: hidden
+    background-color: $hover-grey
+    > .fa-pencil
+      transform: scale(.7)
     &:hover
       opacity: 1
+      background-color: #d6dadc
 
 
   &-cards
@@ -105,8 +248,22 @@
     overflow-y: auto
     flex-direction: column
     flex-wrap: nowrap
-    padding: 0 10px
+    padding: 0 4px 0 10px
     min-height: 30%
+    margin-right: 3px
+    &::-webkit-scrollbar
+      -webkit-appearance: none
+
+    &::-webkit-scrollbar:vertical
+      width: 9px
+
+    &::-webkit-scrollbar-thumb
+      border-radius: 4px
+      background-color: rgba(0, 0, 0, .1)
+
+    &::-webkit-scrollbar-track
+      border-radius: 4px
+      background-color: rgba(0, 0, 0, .1)
 
   &-CardPlaceholder
     position: relative
@@ -119,28 +276,29 @@
     margin-bottom: 6px
     flex-grow: 0
     flex-shrink: 0
+    &:hover
+      .BoardShowPage-Card-box
+        background-color: $hover-grey
+      .BoardShowPage-EditButton
+        visibility: visible
+    &-ghosted
+      +ghosted
     &-beingDragged
       z-index: 100
       position: fixed
       top: 0
       left: 0
-      transform: rotate(7deg)
+      transform: rotate(4deg)
       pointer-events: none
       cursor: grabbing
-    &-ghosted
-      background-color: darkgrey
-      border-radius: 3px
-      cursor: -webkit-grabbing
-      > *
-        visibility: hidden
     &-box
+      display: block
       -webkit-touch-callout: none
       -webkit-user-select: none
       -khtml-user-select: none
       -moz-user-select: none
       -ms-user-select: none
       user-select: none
-      position: relative
       padding: 6px 8px
       border-top: none
       border-left: none
@@ -150,7 +308,6 @@
       background-color: white
       font-weight: 400
       font-size: 14px
-      cursor: move
       > pre
         margin: 0
         font-size: 14px
@@ -162,8 +319,15 @@
         word-wrap: break-word
     &-controls
       position: absolute
-      top: 8px
-      right: 10px
+      top: 5px
+      right: 5px
+    &-labels
+      display: flex
+      flex-direction: row
+      flex-wrap: wrap
+    &-label
+      width: 45px
+      margin: 0 3px 3px 0
 
   &-create-card-link
     padding: 8px 10px

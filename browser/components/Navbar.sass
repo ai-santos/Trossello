@@ -33,6 +33,9 @@
         background: linear-gradient(to bottom,rgba(255,255,255,.4) 0,rgba(255,255,255,.3) 100%)
       &:active
         background: linear-gradient(to bottom,rgba(255,255,255,.45) 0,rgba(255,255,255,.35) 100%)
+    &.Button > .Icon:first-child
+      color: white
+
 
   &-BoardIndexButton
     flex-grow: 1
@@ -69,10 +72,13 @@
     top: $header-height + 5px
     right: 5px
 
-  .BoardsDropdown-dropdown
+  .BoardsDropdown
     z-index: 11
     position: absolute
     top: $header-height + 5px
     left: 5px
     width: 300px
     max-height: calc(100% - 55px)
+
+  .BoardsDropdownButton
+    color: $default-text-color

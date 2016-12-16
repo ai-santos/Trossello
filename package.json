@@ -2,8 +2,9 @@
   "name": "trossello",
   "version": "0.0.1",
   "engines": {
-    "node": "6.3.0",
-    "npm": "3.10.3"
+    "node": "7.1.0",
+    "npm": "3.10.9",
+    "yarn": "0.17.10"
   },
   "description": "Open Source Trello Clone",
   "main": "dist/server.js",
@@ -12,6 +13,7 @@
     "build:watch": "./bin/build -w",
     "start": "./bin/start",
     "test": "./bin/test",
+    "test:coverage": "istanbul cover _mocha -- --recursive ./build/test",
     "heroku-postbuild": "npm run build"
   },
   "repository": {
@@ -36,6 +38,7 @@
     "babel-core": "^6.14.0",
     "babel-eslint": "^6.1.2",
     "babel-loader": "^6.2.5",
+    "babel-plugin-istanbul": "^3.0.0",
     "babel-plugin-transform-class-properties": "^6.11.5",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
     "babel-plugin-transform-regenerator": "^6.14.0",
@@ -66,10 +69,12 @@
     "font-awesome": "^4.7.0",
     "html-loader": "^0.4.4",
     "html-webpack-plugin": "^2.22.0",
+    "istanbul": "^0.4.5",
     "jquery": "^3.1.1",
     "json-loader": "^0.5.4",
     "knex": "^0.12.1",
     "mocha": "^3.0.2",
+    "moment": "^2.16.0",
     "morgan": "^1.7.0",
     "node-sass": "^3.10.0",
     "node-uuid": "^1.4.7",
@@ -81,20 +86,24 @@
     "promise": "^7.1.1",
     "randomstring": "^1.1.5",
     "react": "^15.3.2",
-    "react-dom": "^15.3.2",
+    "react-addons-test-utils": "^15.4.0",
+    "react-dom": "^15.4.0",
     "request": "^2.75.0",
     "request-promise": "^4.1.1",
     "rmdir": "^1.2.0",
     "sass-loader": "^4.0.2",
     "serve-favicon": "^2.3.0",
-    "simple-react-router": "0.0.8",
+    "simple-react-router": "0.0.9",
     "style-loader": "^0.13.1",
+    "throttle-debounce": "^1.0.1",
     "url-loader": "^0.5.7",
     "uuid": "^2.0.3",
     "webpack": "^1.13.2",
     "whatwg-fetch": "^1.0.0"
   },
   "devDependencies": {
+    "enzyme": "^2.6.0",
+    "jsdom": "^9.8.3",
     "nodemon": "^1.10.2",
     "webpack-error-notification": "^0.1.6"
   }

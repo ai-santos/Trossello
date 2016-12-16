@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import Button from '../Button'
+import Button from '../../Button'
 import $ from 'jquery'
-import boardsStore from '../../stores/boardsStore'
-import ConfirmationButton from '../ConfirmationButton'
+import boardsStore from '../../../stores/boardsStore'
+import ConfirmationButton from '../../ConfirmationButton'
 
 export default class LeaveBoardButton extends Component {
 
@@ -28,7 +28,7 @@ export default class LeaveBoardButton extends Component {
   render(){
     return <ConfirmationButton
       type="invisible"
-      className="BoardShowPage-button BoardShowPage-DeleteBoardButton"
+      className="BoardShowPage-MenuSideBar-options"
       onConfirm={this.leaveBoard}
       buttonName="Leave Board"
       title='Leave Board?'

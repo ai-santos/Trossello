@@ -7,7 +7,14 @@ router.get('/', (request, response, next) => {
   queries.getBoardsByUserId(request.session.userId).then(boards => {
     response.json(boards)
   }).catch(next)
-} )
+})
+
+// MOVE TARGETS
+router.get('/move-targets', (request, response, next) => {
+  queries.getBoardMoveTargetsForUserId(request.session.userId).then(boards => {
+    response.json(boards)
+  }).catch(next)
+})
 
 //SEARCH
 router.post('/search', ( request, response, next ) => {
@@ -44,17 +51,17 @@ router.get('/:boardId', (request, response, next ) => {
 
 // UPDATE
 router.post('/:boardId', (request, response, next) => {
-  commands.updateBoard(request.params.boardId, request.body)
+  commands.updateBoard(request.session.userId, request.params.boardId, request.body)
   .then(boardId => {
-      response.json(boardId)
+    response.json(boardId)
   }).catch(next)
 })
 
 // DELETE
 router.post('/:boardId/archive', (request, response, next) => {
   const boardId = request.params.boardId
-  commands.archiveBoard(boardId).then( numberOfDeletions => {
-    if (numberOfDeletions > 0) {
+  commands.archiveBoard(boardId).then( board => {
+    if (board) {
       response.status(200).json(null)
     }else{
       response.status(404).json(null)
@@ -67,7 +74,7 @@ router.post('/:boardId/lists', (request, response, next) => {
   const list = request.body
   const { boardId } = request.params
   list.board_id = boardId
-  commands.createList(list)
+  commands.createList(request.session.userId, list)
     .then( list => {
       response.json(list)
     })
@@ -78,9 +85,10 @@ router.post('/:boardId/lists', (request, response, next) => {
 router.post('/:boardId/lists/:listId/cards', (request, response, next) => {
   const card = request.body
   const { boardId, listId } = request.params
+  const { userId } = request.session
   card.board_id = boardId
   card.list_id = listId
-  commands.createCard(card)
+  commands.createCard(userId, card)
     .then( card => {
       response.json(card)
     })
@@ -110,6 +118,88 @@ router.post('/:boardId/leave', (request, response, next) => {
     })
     .catch(next)
 
+})
+
+// STAR BOARD
+router.post('/:boardId/star', (request, response, next) => {
+  const {boardId} = request.params
+  commands.starBoard(boardId)
+    .then( board => {
+      response.json(null)
+    })
+    .catch(next)
+})
+
+// UNSTAR BOARD
+router.post('/:boardId/unstar', (request, response, next) => {
+  const {boardId} = request.params
+  commands.unstarBoard(boardId)
+    .then( () => {
+      response.json(null)
+    })
+    .catch(next)
+})
+
+// DUPLICATE LIST
+router.post('/:boardId/lists/:listId/duplicate', (request, response, next) => {
+  const { boardId, listId } = request.params
+  const { name } = request.body
+  const { userId } = request.session
+
+  commands.duplicateList(userId, boardId, listId, name)
+    .then(newList => {
+      response.json(newList)
+    })
+    .catch(next)
+})
+
+//CREATE LABEL
+router.post('/:boardId/labels', (request, response, next) => {
+  const { boardId } = request.params
+  const { color, text } = request.body
+  const attributes = {board_id: boardId, text: text, color: color}
+
+  commands.createLabel(attributes)
+    .then(label => {
+      response.json(label)
+    })
+    .catch(next)
+})
+
+//UPDATE LABEL
+router.post('/:boardId/labels/:labelId', (request, response, next) => {
+  const { boardId, labelId } = request.params
+  const { color, text } = request.body
+  const attributes ={board_id: boardId, text: text, color: color}
+
+  commands.updateLabel(labelId, attributes)
+    .then(label => {
+      response.json(label)
+    })
+    .catch(next)
+})
+
+//DELETE LABEL
+router.post('/:boardId/labels/:labelId/delete', (request, response, next) => {
+  const { boardId, labelId } = request.params
+
+  commands.deleteLabel(labelId)
+    .then(() => {
+      response.json(null)
+    })
+    .catch(next)
+})
+
+
+//GET LABEL
+router.get('/:boardId/labels/:labelId', (request, response, next) => {
+  const {boardId, labelId} = request.params
+
+  queries.getLabelById(labelId)
+    .then(label => {
+      response.json(label)
+    })
+    .catch(next)
 })
 
 export default router

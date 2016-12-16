@@ -11,6 +11,9 @@ exports.seed = (knex) => {
       knex.truncate('lists'),
       knex.truncate('boards'),
       knex.truncate('users'),
+      knex.truncate('invites'),
+      knex.truncate('labels'),
+      knex.truncate('card_labels')
     ])
   }
 
@@ -35,9 +38,10 @@ exports.seed = (knex) => {
     const cardRecordsForList = []
     seeds.boards.forEach((board, index) => {
       const boardRecord = boardRecords[index]
-      board.lists.forEach(list => {
+      board.lists.forEach((list, index) => {
         const listRecord = cloneWithout(list,['cards'])
         listRecord.board_id = boardRecord.id
+        listRecord.order = index
         listRecords.push(listRecord)
         cardRecordsForList.push(list.cards.map(card => cloneWithout(card, [])))
       })

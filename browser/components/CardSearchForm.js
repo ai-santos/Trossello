@@ -1,9 +1,12 @@
 import './CardSearchForm.sass'
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
+import debounce from 'throttle-debounce/debounce'
+import $ from 'jquery'
 import Form from './Form'
 import Link from './Link'
 import Icon from './Icon'
-import $ from 'jquery'
+import Spinner from './Spinner'
 import Card from './BoardShowPage/Card'
 
 export default class CardSearchForm extends Component {
@@ -13,15 +16,18 @@ export default class CardSearchForm extends Component {
     this.state = {
       focused: false,
       searchTerm: '',
-      result: null
+      result: [],
+      modalDisplayed: false,
+      loading: false,
     }
     this.setSearchTerm = this.setSearchTerm.bind(this)
     this.onKeyDown = this.onKeyDown.bind(this)
-    this.search = this.search.bind(this)
+    this.onKeyUp = this.onKeyUp.bind(this)
+    this.search = debounce(200, this.search.bind(this))
     this.close = this.close.bind(this)
     this.focus = this.focus.bind(this)
-    this.blur = this.blur.bind(this)
     this.focusOnSlash = this.focusOnSlash.bind(this)
+    this.onClick = this.onClick.bind(this)
   }
 
   componentDidMount(){
@@ -34,27 +40,12 @@ export default class CardSearchForm extends Component {
 
   focusOnSlash(event){
     if (event.key === '/' && event.target !== this.refs.content){
-      event.preventDefault()
       this.refs.content.focus()
     }
   }
 
-  focus(event){
+  focus(){
     this.setState({ focused: true })
-  }
-
-  blur(event){
-    if (!this.state.result){
-      this.setState({
-        focused: false,
-        searchTerm: '',
-        result: null,
-      })
-    }else{
-      this.setState({
-        focused: false,
-      })
-    }
   }
 
   setSearchTerm(event){
@@ -65,43 +56,51 @@ export default class CardSearchForm extends Component {
   close(){
     this.setState({
       searchTerm: '',
-      result: null,
+      result: [],
+      modalDisplayed: false,
+      focused: false
     })
   }
 
   onKeyDown(event) {
     if (event.key === "Escape") {
-      event.preventDefault()
       this.close()
-      this.refs.content.blur()
     }
   }
 
-  search(event) {
-    event.preventDefault()
-    $.ajax({
+  onKeyUp(event){
+    this.search(event)
+  }
+
+  search() {
+    this.setState({loading: true})
+    if (this.searchRequest) this.searchRequest.abort()
+
+    this.searchRequest = $.ajax({
       method: "POST",
       url: "/api/boards/search",
       contentType: "application/json; charset=utf-8",
       dataType: "json",
       data: JSON.stringify({searchTerm: this.state.searchTerm}),
     })
-    .then(result => {
-      this.setState({result})
-      boardStore.reload()
-    })
-    .catch(error => {
-      console.error(error)
+
+    this.searchRequest.then(result => {
+      this.setState({result, loading: false})
     })
   }
 
+  onClick(){
+    this.setState({modalDisplayed: true})
+  }
+
   render(){
-    const searchResultModal = this.state.result ?
+    const searchResultModal = this.state.modalDisplayed ?
       <SearchResultModal
         className="CardSearchForm-Result"
         onClose={this.close}
         searchTerm={this.state.searchTerm}
         result={this.state.result}
+        loading={this.state.loading}
       /> :
       null
     const icon = this.state.focused ?
@@ -117,7 +116,8 @@ export default class CardSearchForm extends Component {
         value={this.state.searchTerm}
         onChange={this.setSearchTerm}
         onFocus={this.focus}
-        onBlur={this.blur}
+        onKeyUp={this.search.bind(this)}
+        onClick={this.onClick}
       />
       {icon}
       {searchResultModal}
@@ -129,26 +129,63 @@ export default class CardSearchForm extends Component {
 
 class SearchResultModal extends Component {
 
+  constructor(props) {
+    super(props)
+    this.closeIfUserClickedElsewhere = this.closeIfUserClickedElsewhere.bind(this)
+    document.body.addEventListener("click", this.closeIfUserClickedElsewhere)
+  }
+
+  componentWillUnmount(){
+    document.body.removeEventListener("click", this.closeIfUserClickedElsewhere)
+  }
+
+  closeIfUserClickedElsewhere(event){
+    const container = ReactDOM.findDOMNode(this.refs.window)
+    if (!container.contains(event.target) && container !== event.target) {
+      this.props.onClose()
+    }
+  }
+
   render() {
     const { result, searchTerm, onClose } = this.props
+    if (this.props.loading) {
+      return <div className="CardSearchForm-Modal" >
+        <div ref="window" className="CardSearchForm-Modal-window">
+          <Link className="CardSearchForm-Modal-window-close" onClick={onClose}>
+            <Icon type="times" />
+          </Link>
+          <div className="CardSearchForm-Modal-Loader">
+            <h4 className="CardSearchForm-Modal-Loader-text">Searching...</h4>
+            <Spinner />
+          </div>
+        </div>
+      </div>
+    }
+
     const cardNodes = result.map(card =>
       <Card
         key={card.id}
         card={card}
         editable={false}
-        onClick={this.props.onClose}
+        onClick={onClose}
       />
     )
-    return <div className="CardSearchForm-Modal">
-      <div ref="shroud" className="CardSearchForm-Modal-shroud" onClick={this.props.onClose} />
+
+    const searchDisplay = result.length === 0 ?
+      <div className="CardSearchForm-Result-Message">
+        <h5>No cards or boards were found matching your search</h5>
+      </div> :
+      <div className="CardSearchForm-Modal-window-results">
+        {cardNodes}
+      </div>
+
+    return <div className="CardSearchForm-Modal" >
       <div ref="window" className="CardSearchForm-Modal-window">
         <h5 className="CardSearchForm-Result-Title">Card Search Results For: &quot;{this.props.searchTerm}&quot;</h5>
-        <Link className="CardSearchForm-Modal-window-close" onClick={this.props.onClose}>
+        <Link className="CardSearchForm-Modal-window-close" onClick={onClose}>
           <Icon type="times" />
         </Link>
-        <div className="CardSearchForm-Modal-window-results">
-          {cardNodes}
-        </div>
+        {searchDisplay}
       </div>
     </div>
   }

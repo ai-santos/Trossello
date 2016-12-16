@@ -8,6 +8,7 @@ import autosize from 'autosize'
 import ArchiveButton from './ArchiveButton'
 import ConfirmationLink from '../ConfirmationLink'
 import EditCardForm from './EditCardForm'
+import CardLabel from './Card/CardLabel'
 
 export default class Card extends Component {
   static contextTypes = {
@@ -16,6 +17,17 @@ export default class Card extends Component {
 
   static propTypes = {
     card: React.PropTypes.object.isRequired,
+    board: React.PropTypes.object,
+    editable: React.PropTypes.bool,
+    ghosted: React.PropTypes.bool,
+    beingDragged: React.PropTypes.bool,
+    style: React.PropTypes.object,
+  };
+
+  static defaultProps = {
+    editable: false,
+    ghosted: false,
+    beingDragged: false,
   };
 
   constructor(props){
@@ -29,10 +41,11 @@ export default class Card extends Component {
     this.editCard = this.editCard.bind(this)
     this.cancelEditingCard = this.cancelEditingCard.bind(this)
     this.updateCard = this.updateCard.bind(this)
-    this.onClick = this.onClick.bind(this)
+    this.openShowCardModal = this.openShowCardModal.bind(this)
   }
 
   editCard(event) {
+    event.preventDefault()
     event.stopPropagation()
     const rect = this.refs.card.getBoundingClientRect()
     this.setState({
@@ -53,7 +66,6 @@ export default class Card extends Component {
   }
 
   updateCard(updates){
-    console.log('updateCard ???')
     const { card } = this.props
     const cardClone = Object.assign({}, card)
     Object.assign(card, updates)
@@ -72,27 +84,30 @@ export default class Card extends Component {
     })
   }
 
-  onClick(event){
-    if (event.isPropagationStopped()) return
-    event.stopPropagation()
-    this.openShowCardModal()
-    if (this.props.onClick) this.props.onClick()
-  }
-
-  openShowCardModal(){
+  openShowCardModal(event){
     const { card } = this.props
+    if (event.isPropagationStopped() || event.ctrlKey || event.metaKey || event.shiftKey) return
+    event.preventDefault()
     this.context.redirectTo(`/boards/${card.board_id}/cards/${card.id}`)
   }
 
   render() {
     const {
+      board,
       card,
-      index,
       editable,
       ghosted,
       beingDragged,
       style
     } = this.props
+
+    let cardLabels = !board ? null : card.label_ids
+      .map( labelId => board.labels.find(label => label.id === labelId))
+      .map( label =>
+        <div key={label.id} className="BoardShowPage-Card-label">
+          <CardLabel color={label.color} text={''} checked={false} />
+        </div>
+      )
 
     const editCardButton = this.props.editable ?
       <EditCardButton onClick={this.editCard} /> : null
@@ -109,26 +124,37 @@ export default class Card extends Component {
       null
 
     let className = 'BoardShowPage-Card'
+
+    const archivedFooter= card.archived ?
+     <div><Icon type="archive" /> Archived</div> :
+      null
     if (ghosted) className += ' BoardShowPage-Card-ghosted'
     if (beingDragged) className += ' BoardShowPage-Card-beingDragged'
 
     return <div
-        ref="card"
-        className={className}
-        style={style}
-      >
+      ref="card"
+      className={className}
+      style={style}
+    >
       {editCardModal}
-      <div
+      <Link
+        href={`/boards/${card.board_id}/cards/${card.id}`}
         className="BoardShowPage-Card-box"
         data-card-id={card.id}
         data-list-id={card.list_id}
         data-order={card.order}
-        onClick={this.onClick}
+        onClick={this.openShowCardModal}
+        draggable
+        onDragStart={this.props.onDragStart}
       >
-        <pre>{card.content}</pre>
-        <div className="BoardShowPage-Card-controls">
-          {editCardButton}
-        </div>
+      <div className="BoardShowPage-Card-labels">
+        {cardLabels}
+      </div>
+      <pre>{card.content}</pre>
+      {archivedFooter}
+      </Link>
+      <div className="BoardShowPage-Card-controls">
+        {editCardButton}
       </div>
     </div>
   }
