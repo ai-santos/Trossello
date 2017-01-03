@@ -2,13 +2,13 @@ import React, { Component } from 'react'
 import Form from '../Form'
 import Link from '../Link'
 import Icon from '../Icon'
-import $ from 'jquery'
 import boardStore from '../../stores/boardStore'
 import autosize from 'autosize'
 import ArchiveButton from './ArchiveButton'
 import ConfirmationLink from '../ConfirmationLink'
 import EditCardForm from './EditCardForm'
 import CardLabel from './Card/CardLabel'
+import commands from '../../commands'
 
 export default class Card extends Component {
   static contextTypes = {
@@ -40,7 +40,6 @@ export default class Card extends Component {
     }
     this.editCard = this.editCard.bind(this)
     this.cancelEditingCard = this.cancelEditingCard.bind(this)
-    this.updateCard = this.updateCard.bind(this)
     this.openShowCardModal = this.openShowCardModal.bind(this)
   }
 
@@ -62,25 +61,6 @@ export default class Card extends Component {
       cardTop: null,
       cardLeft: null,
       cardWidth: null,
-    })
-  }
-
-  updateCard(updates){
-    const { card } = this.props
-    const cardClone = Object.assign({}, card)
-    Object.assign(card, updates)
-    $.ajax({
-      method: 'post',
-      url: `/api/cards/${card.id}`,
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      data: JSON.stringify(updates),
-    }).then(() => {
-      this.cancelEditingCard()
-      boardStore.reload()
-    }).catch(error => {
-      Object.assign(card, cardClone)
-      throw error
     })
   }
 
@@ -116,7 +96,7 @@ export default class Card extends Component {
       <EditCardModal
         card={this.props.card}
         onCancel={this.cancelEditingCard}
-        onSave={this.updateCard}
+        onSave={this.cancelEditingCard}
         top={this.state.cardTop}
         left={this.state.cardLeft}
         width={this.state.cardWidth}
@@ -180,14 +160,16 @@ class EditCardModal extends Component {
     super(props)
     this.cancel = this.cancel.bind(this)
   }
+
   stopPropagation(event){
     event.preventDefault()
     event.stopPropagation()
   }
-  cancel(event){
-    event.stopPropagation()
-    this.props.onCancel(event)
+
+  cancel(){
+    this.props.onCancel()
   }
+
   render(){
     const style = {
       top: this.props.top,

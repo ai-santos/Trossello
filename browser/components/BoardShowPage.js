@@ -6,7 +6,6 @@ import Button from './Button'
 import Icon from './Icon'
 import $ from 'jquery'
 import boardStore from '../stores/boardStore'
-import boardsStore from '../stores/boardsStore'
 import DeleteBoardButton from './BoardShowPage/MenuSideBar/DeleteBoardButton'
 import CardModal from './BoardShowPage/Card/CardModal'
 import List from './BoardShowPage/List'
@@ -17,6 +16,8 @@ import BoardStar from './BoardStar'
 import MenuSideBar from './BoardShowPage/MenuSideBar'
 import RenameBoardDropdown from './BoardShowPage/RenameBoardDropdown'
 import PopoverMenuButton from './PopoverMenuButton'
+import commands from '../commands'
+import setFaviconColor from '../setFaviconColor'
 
 class BoardProvider extends Component {
   constructor(props){
@@ -72,6 +73,7 @@ class BoardShowPage extends React.Component {
       draggingCardNewListId: null,
       draggingCardNewOrder: null,
     }
+
     this.toggleSideBar = this.toggleSideBar.bind(this)
     this.closeSideBar = this.closeSideBar.bind(this)
     this.scrollToTheRight = this.scrollToTheRight.bind(this)
@@ -299,45 +301,13 @@ class BoardShowPage extends React.Component {
   }
 
 
-  moveList({ list, order}){
-    const { board } = this.props
-    list.order = order
-
-    $.ajax({
-      method: 'post',
-      url: `/api/lists/${list.id}/move`,
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      data: JSON.stringify({
-        boardId: list.board_id,
-        order: order,
-      })
-    }).then(() => {
-      boardStore.reload()
-    })
+  moveList({ list, order }){
+    commands.moveList(list.id, list.board_id, order)
   }
 
   moveCard({ card, listId, order }){
-    const { board } = this.props
-
-    card.list_id = listId
-    card.order = order
-
-    $.ajax({
-      method: 'post',
-      url: `/api/cards/${card.id}/move`,
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      data: JSON.stringify({
-        boardId: card.board_id,
-        listId: listId,
-        order: order,
-      }),
-    }).then(() => {
-      boardStore.reload()
-    })
+    commands.moveCard(card.id, card.board_id, listId, order)
   }
-
 
   closeCardModal(){
     this.context.redirectTo(`/boards/${this.props.board.id}`)
@@ -389,7 +359,6 @@ class BoardShowPage extends React.Component {
     let lists = this.getLists()
     let cards = this.getCards()
 
-
     let cardModal
     if (viewingCard) {
       let card = board.cards.find(card => card.id === viewingCard)
@@ -423,8 +392,9 @@ class BoardShowPage extends React.Component {
         board={this.props.board}
       />
 
+    let faviconColor = board.background_color
     const className = `BoardShowPage ${this.state.sideBarOpen ? 'BoardShowPage-sideBarOpen' : ''}`
-    return <Layout className={className} style={style}>
+    return <Layout className={className} style={style} faviconColor={faviconColor} >
       {cardModal}
       <div className="BoardShowPage-container">
         <Header board={board} toggleSideBar={this.toggleSideBar} sideBarOpen={this.state.sideBarOpen} renameBoardDropdown={renameBoardDropdown}/>
@@ -452,7 +422,7 @@ const Header = ({board, sideBarOpen, toggleSideBar, renameBoardDropdown}) =>
     <PopoverMenuButton className="BoardShowPage-RenameBoardButton" type="invisible" popover={renameBoardDropdown}>
       <h1>{board.name}</h1>
     </PopoverMenuButton>
-    <BoardStar board={board} onChange={reloadBoardStores} />
+    <BoardStar board={board}/>
     <div className="flex-spacer" />
     <Link
       className="BoardShowPage-menuButton"
@@ -469,9 +439,4 @@ const clearTextSelection = () => {
     document.selection;
   if (sel && sel.removeAllRanges) sel.removeAllRanges();
   if (sel && sel.empty) sel.empty();
-}
-
-const reloadBoardStores = () => {
-  boardStore.reload()
-  boardsStore.reload()
 }

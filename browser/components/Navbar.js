@@ -3,7 +3,6 @@ import './Navbar.sass'
 import Form from './Form'
 import Link from './Link'
 import Icon from './Icon'
-import $ from 'jquery'
 import LogoutButton from './LogoutButton'
 import LoginButton from './LoginButton'
 import CreateBoardPopover from './CreateBoardPopover'
@@ -11,6 +10,7 @@ import ToggleComponent from './ToggleComponent'
 import CardSearchForm from './CardSearchForm'
 import PopoverMenuButton from './PopoverMenuButton'
 import BoardsDropdown from './BoardsDropdown'
+import Button from './Button'
 
 export default class Navbar extends Component {
 
@@ -24,6 +24,11 @@ export default class Navbar extends Component {
     const boardsDropdownButton = user.boards_dropdown_lock ?
       null :
       <BoardsDropdownButton className="Navbar-button BoardButton" />
+    const styleguideLink = ( process.env.NODE_ENV === 'development' ) ?
+        <Button className="Navbar-button" type={'navbar'} href="/styleguide" >
+          <Icon type="paint-brush" />
+        </Button>: null
+
     return <div className="Navbar">
       {boardsDropdownButton}
       <CardSearchForm className="Navbar-Search" />
@@ -43,6 +48,7 @@ export default class Navbar extends Component {
         <span>{user.name}</span>
       </button>
       <LogoutButton className="Navbar-button">Logout</LogoutButton>
+      {styleguideLink}
       <button className="Navbar-button AlertButton">
         <Icon type="bell" />
       </button>

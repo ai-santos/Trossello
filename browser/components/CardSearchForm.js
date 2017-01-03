@@ -1,13 +1,14 @@
 import './CardSearchForm.sass'
+import $ from 'jquery'
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 import debounce from 'throttle-debounce/debounce'
-import $ from 'jquery'
 import Form from './Form'
 import Link from './Link'
 import Icon from './Icon'
 import Spinner from './Spinner'
 import Card from './BoardShowPage/Card'
+import commands from '../commands'
 
 export default class CardSearchForm extends Component {
 
@@ -28,6 +29,7 @@ export default class CardSearchForm extends Component {
     this.focus = this.focus.bind(this)
     this.focusOnSlash = this.focusOnSlash.bind(this)
     this.onClick = this.onClick.bind(this)
+    this.onSubmit = this.onSubmit.bind(this)
   }
 
   componentDidMount(){
@@ -39,7 +41,12 @@ export default class CardSearchForm extends Component {
   }
 
   focusOnSlash(event){
-    if (event.key === '/' && event.target !== this.refs.content){
+    if (
+      event.key === '/' &&
+      event.target !== this.refs.content &&
+      !$(event.target).is(':input')
+    ){
+      event.preventDefault()
       this.refs.content.focus()
     }
   }
@@ -76,13 +83,7 @@ export default class CardSearchForm extends Component {
     this.setState({loading: true})
     if (this.searchRequest) this.searchRequest.abort()
 
-    this.searchRequest = $.ajax({
-      method: "POST",
-      url: "/api/boards/search",
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      data: JSON.stringify({searchTerm: this.state.searchTerm}),
-    })
+    this.searchRequest = commands.search(this.state.searchTerm)
 
     this.searchRequest.then(result => {
       this.setState({result, loading: false})
@@ -91,6 +92,10 @@ export default class CardSearchForm extends Component {
 
   onClick(){
     this.setState({modalDisplayed: true})
+  }
+
+  onSubmit(event) {
+    event.preventDefault()
   }
 
   render(){
@@ -107,7 +112,7 @@ export default class CardSearchForm extends Component {
       <Icon type="times"  className="CardSearchForm-cancel-icon" /> :
       <Icon type="search" className="CardSearchForm-search-icon" />
 
-    return <Form className="CardSearchForm" onSubmit={this.search} >
+    return <Form className="CardSearchForm" onSubmit={this.onSubmit} >
       <input
         type="text"
         onKeyDown={this.onKeyDown}
