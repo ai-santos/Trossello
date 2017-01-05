@@ -36,10 +36,6 @@ export default class CardSearchForm extends Component {
     $('body').on('keydown', this.focusOnSlash)
   }
 
-  componentWillUnmount(){
-    $('body').off('keydown', this.focusOnSlash)
-  }
-
   focusOnSlash(event){
     if (
       event.key === '/' &&
@@ -48,6 +44,7 @@ export default class CardSearchForm extends Component {
     ){
       event.preventDefault()
       this.refs.content.focus()
+      this.setState({modalDisplayed: true})
     }
   }
 
@@ -91,7 +88,12 @@ export default class CardSearchForm extends Component {
   }
 
   onClick(){
-    this.setState({modalDisplayed: true})
+    console.log('on click this is our search', this.state.searchTerm)
+    if( this.state.searchTerm.length >= 1){
+      this.props.value=this.state.searchTerm
+    }else {
+      this.setState({modalDisplayed: true})
+    }
   }
 
   onSubmit(event) {
